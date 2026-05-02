@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_REPORTS 100
+#define DESC_LEN 100
+
+// Define structure
+typedef struct {
+    char location[50];
+    char description[DESC_LEN];
+} Report;
+
+// Declare array of structure
+Report reports[MAX_REPORTS];
+int reportCount = 0;
+
+// Function Prototypes
+void createReport();
+void displayReports();
+void updateReport();
+void deleteReport();
+void deleteAll();
+
+int main() {
+    int choice;
+
+    while (1) {
+        printf("\n--- MAIN MENU ---\n");
+        printf("1. Create/Add Reports\n");
+        printf("2. Display Reports\n");
+        printf("3. Update Reports\n");
+        printf("4. Delete Reports\n");
+        printf("5. Delete All Reports\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1: createReport(); break;
+            case 2: displayReports(); break;
+            case 3: updateReport(); break;
+            case 4: deleteReport(); break;
+            case 5: deleteAll(); break;
+            case 6: return 0;
+            default: printf("Invalid choice!\n");
+        }
+    }
+}
+
+// Create Reports
+void createReport() {
+    int num;
+    printf("How many reports you want to submit? ");
+    scanf("%d", &num);
+    getchar();
+
+    for (int i = 0; i < num; i++) {
+        if (reportCount >= MAX_REPORTS) {
+            printf("Storage full!\n");
+            return;
+        }
+
+        printf("\nAvailable Locations:\n");
+        printf("- DEANS OFFICE\n- ICT OFFICE\n- COM LAB 1 to 4\n");
+        printf("- HUMSS OFFICE\n- ICT ELEC 1 & 2\n");
+
+        printf("Enter the location: ");
+        fgets(reports[reportCount].location, 50, stdin);
+        reports[reportCount].location[strcspn(reports[reportCount].location, "\n")] = 0;
+
+        printf("Add description: ");
+        fgets(reports[reportCount].description, DESC_LEN, stdin);
+        reports[reportCount].description[strcspn(reports[reportCount].description, "\n")] = 0;
+
+        reportCount++;
+        printf("Report added successfully.\n");
+    }
+}
+
+// Display Reports
+void displayReports() {
+    if (reportCount == 0) {
+        printf("\nNo reports found.\n");
+        return;
+    }
+
+    printf("\n--- All Reports ---\n");
+    for (int i = 0; i < reportCount; i++) {
+        printf("[%d] Location: %s\n Description: %s\n",
+               i + 1,
+               reports[i].location,
+               reports[i].description);
+    }
+}
+
+// Update Report
+void updateReport() {
+    displayReports();
+    if (reportCount == 0) return;
+
+    int index;
+    printf("\nEnter report number to update: ");
+    scanf("%d", &index);
+    getchar();
+
+    if (index > 0 && index <= reportCount) {
+        printf("Enter new location: ");
+        fgets(reports[index - 1].location, 50, stdin);
+        reports[index - 1].location[strcspn(reports[index - 1].location, "\n")] = 0;
+
+        printf("Enter new description: ");
+        fgets(reports[index - 1].description, DESC_LEN, stdin);
+        reports[index - 1].description[strcspn(reports[index - 1].description, "\n")] = 0;
+
+        printf("Report updated!\n");
+    } else {
+        printf("Invalid index.\n");
+    }
+}
+
+// Delete Report
+void deleteReport() {
+    displayReports();
+    if (reportCount == 0) return;
+
+    int index;
+    printf("\nEnter report number to delete: ");
+    scanf("%d", &index);
+
+    if (index > 0 && index <= reportCount) {
+        for (int i = index - 1; i < reportCount - 1; i++) {
+            reports[i] = reports[i + 1];
+        }
+        reportCount--;
+        printf("Report deleted.\n");
+    } else {
+        printf("Invalid index.\n");
+    }
+}
+
+// Delete All Reports
+void deleteAll() {
+    char confirm;
+    printf("Are you sure you want to delete all reports? (y/n): ");
+    getchar();
+    scanf("%c", &confirm);
+
+    if (confirm == 'y' || confirm == 'Y') {
+        reportCount = 0;
+        printf("All reports cleared.\n");
+    }
+}
