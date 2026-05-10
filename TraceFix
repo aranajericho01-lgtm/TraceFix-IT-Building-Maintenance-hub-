@@ -4,15 +4,23 @@
 #define MAX_REPORTS 100
 #define DESC_LEN 100
 
-// Define structure
+// Structure
 typedef struct {
     char location[50];
     char description[DESC_LEN];
 } Report;
 
-// Declare array of structure
+// Array of Structures
 Report reports[MAX_REPORTS];
 int reportCount = 0;
+
+// STACK
+Report stack[MAX_REPORTS];
+int top = -1;
+
+// QUEUE
+Report queue[MAX_REPORTS];
+int front = 0, rear = -1;
 
 // Function Prototypes
 void createReport();
@@ -21,18 +29,32 @@ void updateReport();
 void deleteReport();
 void deleteAll();
 
+void pushStack(Report r);
+void displayStack();
+
+void enqueue(Report r);
+void displayQueue();
+
+void sortReports();
+void linearSearch();
+
 int main() {
     int choice;
 
     while (1) {
-        printf("\n--- MAIN MENU ---\n");
+        printf("\n====== MAIN MENU ======\n");
         printf("1. Create/Add Reports\n");
         printf("2. Display Reports\n");
         printf("3. Update Reports\n");
         printf("4. Delete Reports\n");
         printf("5. Delete All Reports\n");
-        printf("6. Exit\n");
-        printf("Enter your choice: ");
+        printf("6. Display Stack\n");
+        printf("7. Display Queue\n");
+        printf("8. Sort Reports\n");
+        printf("9. Search Report\n");
+        printf("10. Exit\n");
+
+        printf("Enter choice: ");
         scanf("%d", &choice);
         getchar();
 
@@ -42,112 +64,249 @@ int main() {
             case 3: updateReport(); break;
             case 4: deleteReport(); break;
             case 5: deleteAll(); break;
-            case 6: return 0;
+            case 6: displayStack(); break;
+            case 7: displayQueue(); break;
+            case 8: sortReports(); break;
+            case 9: linearSearch(); break;
+            case 10: return 0;
             default: printf("Invalid choice!\n");
         }
     }
 }
 
-// Create Reports
+// CREATE REPORT
 void createReport() {
     int num;
-    printf("How many reports you want to submit? ");
+
+    printf("How many reports to add? ");
     scanf("%d", &num);
     getchar();
 
     for (int i = 0; i < num; i++) {
+
         if (reportCount >= MAX_REPORTS) {
-            printf("Storage full!\n");
+            printf("Storage Full!\n");
             return;
         }
 
         printf("\nAvailable Locations:\n");
-        printf("- DEANS OFFICE\n- ICT OFFICE\n- COM LAB 1 to 4\n");
-        printf("- HUMSS OFFICE\n- ICT ELEC 1 & 2\n");
+        printf("- DEANS OFFICE\n");
+        printf("- ICT OFFICE\n");
+        printf("- COM LAB 1 to 4\n");
+        printf("- HUMSS OFFICE\n");
+        printf("- ICT ELEC 1 & 2\n");
 
-        printf("Enter the location: ");
+        printf("Enter Location: ");
         fgets(reports[reportCount].location, 50, stdin);
         reports[reportCount].location[strcspn(reports[reportCount].location, "\n")] = 0;
 
-        printf("Add description: ");
+        printf("Enter Description: ");
         fgets(reports[reportCount].description, DESC_LEN, stdin);
         reports[reportCount].description[strcspn(reports[reportCount].description, "\n")] = 0;
 
+        // STACK
+        pushStack(reports[reportCount]);
+
+        // QUEUE
+        enqueue(reports[reportCount]);
+
         reportCount++;
-        printf("Report added successfully.\n");
+
+        printf("Report Added Successfully!\n");
     }
 }
 
-// Display Reports
+// DISPLAY REPORTS
 void displayReports() {
+
     if (reportCount == 0) {
-        printf("\nNo reports found.\n");
+        printf("\nNo reports available.\n");
         return;
     }
 
-    printf("\n--- All Reports ---\n");
+    printf("\n====== REPORT LIST ======\n");
+
     for (int i = 0; i < reportCount; i++) {
-        printf("[%d] Location: %s\n Description: %s\n",
-               i + 1,
-               reports[i].location,
-               reports[i].description);
+
+        printf("[%d]\n", i + 1);
+        printf("Location: %s\n", reports[i].location);
+        printf("Description: %s\n\n", reports[i].description);
     }
 }
 
-// Update Report
+// UPDATE REPORT
 void updateReport() {
+
     displayReports();
-    if (reportCount == 0) return;
+
+    if (reportCount == 0)
+        return;
 
     int index;
-    printf("\nEnter report number to update: ");
+
+    printf("Enter report number to update: ");
     scanf("%d", &index);
     getchar();
 
     if (index > 0 && index <= reportCount) {
-        printf("Enter new location: ");
+
+        printf("Enter New Location: ");
         fgets(reports[index - 1].location, 50, stdin);
         reports[index - 1].location[strcspn(reports[index - 1].location, "\n")] = 0;
 
-        printf("Enter new description: ");
+        printf("Enter New Description: ");
         fgets(reports[index - 1].description, DESC_LEN, stdin);
         reports[index - 1].description[strcspn(reports[index - 1].description, "\n")] = 0;
 
-        printf("Report updated!\n");
+        printf("Report Updated Successfully!\n");
+
     } else {
-        printf("Invalid index.\n");
+        printf("Invalid Index!\n");
     }
 }
 
-// Delete Report
+// DELETE REPORT
 void deleteReport() {
+
     displayReports();
-    if (reportCount == 0) return;
+
+    if (reportCount == 0)
+        return;
 
     int index;
-    printf("\nEnter report number to delete: ");
+
+    printf("Enter report number to delete: ");
     scanf("%d", &index);
 
     if (index > 0 && index <= reportCount) {
+
         for (int i = index - 1; i < reportCount - 1; i++) {
             reports[i] = reports[i + 1];
         }
+
         reportCount--;
-        printf("Report deleted.\n");
+
+        printf("Report Deleted Successfully!\n");
+
     } else {
-        printf("Invalid index.\n");
+        printf("Invalid Index!\n");
     }
 }
 
-// Delete All Reports
+// DELETE ALL
 void deleteAll() {
+
     char confirm;
-    printf("Are you sure you want to delete all reports? (y/n): ");
+
+    printf("Are you sure? (y/n): ");
     getchar();
     scanf("%c", &confirm);
 
     if (confirm == 'y' || confirm == 'Y') {
+
         reportCount = 0;
-        printf("All reports cleared.\n");
+        top = -1;
+        front = 0;
+        rear = -1;
+
+        printf("All Reports Deleted!\n");
+    }
+}
+
+// STACK FUNCTIONS
+void pushStack(Report r) {
+
+    if (top < MAX_REPORTS - 1) {
+        top++;
+        stack[top] = r;
+    }
+}
+
+void displayStack() {
+
+    if (top == -1) {
+        printf("\nStack is Empty.\n");
+        return;
+    }
+
+    printf("\n====== STACK REPORTS ======\n");
+
+    for (int i = top; i >= 0; i--) {
+
+        printf("Location: %s\n", stack[i].location);
+        printf("Description: %s\n\n", stack[i].description);
+    }
+}
+
+// QUEUE FUNCTIONS
+void enqueue(Report r) {
+
+    if (rear < MAX_REPORTS - 1) {
+        rear++;
+        queue[rear] = r;
+    }
+}
+
+void displayQueue() {
+
+    if (rear < front) {
+        printf("\nQueue is Empty.\n");
+        return;
+    }
+
+    printf("\n====== QUEUE REPORTS ======\n");
+
+    for (int i = front; i <= rear; i++) {
+
+        printf("Location: %s\n", queue[i].location);
+        printf("Description: %s\n\n", queue[i].description);
+    }
+}
+
+// SORTING (Bubble Sort)
+void sortReports() {
+
+    Report temp;
+
+    for (int i = 0; i < reportCount - 1; i++) {
+
+        for (int j = 0; j < reportCount - i - 1; j++) {
+
+            if (strcmp(reports[j].location, reports[j + 1].location) > 0) {
+
+                temp = reports[j];
+                reports[j] = reports[j + 1];
+                reports[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("Reports Sorted by Location!\n");
+}
+
+// LINEAR SEARCH
+void linearSearch() {
+
+    char search[50];
+    int found = 0;
+
+    printf("Enter location to search: ");
+    fgets(search, 50, stdin);
+    search[strcspn(search, "\n")] = 0;
+
+    for (int i = 0; i < reportCount; i++) {
+
+        if (strcmp(search, reports[i].location) == 0) {
+
+            printf("\nReport Found!\n");
+            printf("Location: %s\n", reports[i].location);
+            printf("Description: %s\n", reports[i].description);
+
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No matching report found.\n");
     }
 }
